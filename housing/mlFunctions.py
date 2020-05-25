@@ -65,12 +65,5 @@ def cross_val_scoresAndPrint(model, X, y, scoring="neg_mean_squared_error", cv=1
     display_scores(rmse_scores)
     return scores
 
-def testAndPrint(model, X, y, name):
-    y_predictions = model.predict(X)
-    mse = mean_squared_error(y, y_predictions)
-    rmse = np.sqrt(mse)
-    print("")
-    print(name," MSE: ","{:.2f}".format(rmse))
-    print(name, " RMSE: ", "{:.2f}".format(model.score(X,y)))
-    return y_predictions
+ 
 
