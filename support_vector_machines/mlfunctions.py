@@ -2,24 +2,33 @@ import numpy as np
 import pandas as pd
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import mean_squared_error
 
-def grid_search_svr(param_grid, data, labels, cv=3, verbose=2):
-    svr = SVR() 
-    svr_grid_search = GridSearchCV(svr, param_grid=param_grid, cv=cv,
+def grid_search(model, param_grid, X, y, cv=3, verbose=2):
+    grid_search = GridSearchCV(model, param_grid=param_grid, cv=cv,
                                scoring='neg_mean_squared_error',
                                return_train_score=True, verbose=verbose)
-    svr_grid_search.fit(data, labels)
-    svr_gs_res = compile_results_gs(svr_grid_search)
+    grid_search.fit(X, y)
+    gs_res = compile_results_search(grid_search)
     
-    return svr_grid_search, svr_gs_res
+    return grid_search, gs_res
 
-def compile_results_gs(grid_search):
-    cvres = grid_search.cv_results_
-    gs_res = pd.DataFrame(zip(-cvres["mean_test_score"], cvres["params"]),
+def random_search(model, param_distributions, X, y, n_iter=10, cv=3, verbose=2):
+    random_search = RandomizedSearchCV(model, param_distributions=param_distributions, n_iter=n_iter, cv=cv,
+                               scoring='neg_mean_squared_error',
+                               return_train_score=True, verbose=verbose)
+    random_search.fit(X, y)
+    random_res = compile_results_search(random_search)
+    
+    return random_search, random_res
+
+def compile_results_search(search):
+    cvres = search.cv_results_
+    search_res = pd.DataFrame(zip(-cvres["mean_test_score"], cvres["params"]),
                  columns=['mean_test_score','params'])
-    gs_res.sort_values('mean_test_score', inplace=True, ascending=True)
-    return gs_res
+    search_res.sort_values('mean_test_score', inplace=True, ascending=True)
+    return search_res
 
 def test_model(model, X, y):
     y_predictions = model.predict(X)
